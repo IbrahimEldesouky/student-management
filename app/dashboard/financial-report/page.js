@@ -33,21 +33,28 @@ export default function FinancialReportPage() {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.replace("/");
-        return;
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (user) => {
+        if (!user) {
+          router.replace("/");
+          return;
+        }
+
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(
+          now.getMonth() + 1
+        ).padStart(2, "0");
+
+        setSelectedMonth(
+          year + "-" + month
+        );
+
+        await loadData();
       }
-
-      const now = new Date();
-
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-
-      setSelectedMonth(year + "-" + month);
-
-      await loadData();
-    });
+    );
 
     return () => unsubscribe();
   }, [router]);
@@ -86,9 +93,10 @@ export default function FinancialReportPage() {
 
       setStudents(studentsData);
 
-      const subscriptionsSnapshot = await getDocs(
-        collection(db, "subscriptions")
-      );
+      const subscriptionsSnapshot =
+        await getDocs(
+          collection(db, "subscriptions")
+        );
 
       const subscriptionsData = [];
 
@@ -99,38 +107,142 @@ export default function FinancialReportPage() {
         });
       });
 
-      setSubscriptions(subscriptionsData);
+      setSubscriptions(
+        subscriptionsData
+      );
     } catch (error) {
-      console.error("Financial report error:", error);
+      console.error(
+        "Financial report error:",
+        error
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const formatMoney = (amount) => {
-    return Number(amount || 0).toLocaleString("ar-EG");
+    return Number(
+      amount || 0
+    ).toLocaleString("ar-EG");
   };
 
-  const normalizeEgyptianPhone = (phone) => {
+  // تحويل الأرقام العربية والفارسية إلى أرقام إنجليزية
+  const convertArabicDigits = (
+    value
+  ) => {
+    if (!value) {
+      return "";
+    }
+
+    return String(value)
+      .replace(
+        /[٠-٩]/g,
+        (digit) => {
+          return String(
+            "٠١٢٣٤٥٦٧٨٩".indexOf(
+              digit
+            )
+          );
+        }
+      )
+      .replace(
+        /[۰-۹]/g,
+        (digit) => {
+          return String(
+            "۰۱۲۳۴۵۶۷۸۹".indexOf(
+              digit
+            )
+          );
+        }
+      );
+  };
+
+  // تحويل رقم الهاتف المصري إلى صيغة WhatsApp
+  //
+  // أرقام أولياء الأمور في النظام مخزنة
+  // 10 أرقام بدون الصفر الأول.
+  //
+  // مثال:
+  // 1038420020
+  //
+  // يتحول إلى:
+  // 201038420020
+  const normalizeEgyptianPhone = (
+    phone
+  ) => {
     if (!phone) {
       return "";
     }
 
-    let value = String(phone).replace(/\D/g, "");
+    let value =
+      convertArabicDigits(
+        phone
+      ).replace(
+        /\D/g,
+        ""
+      );
 
-    if (value.startsWith("0020")) {
-      value = value.substring(2);
+    if (!value) {
+      return "";
     }
 
-    if (value.startsWith("20")) {
+    // إذا كان الرقم مكتوبًا بكود مصر 0020
+    if (
+      value.startsWith("0020")
+    ) {
+      value =
+        value.substring(2);
+    }
+
+    // إذا كان الرقم بالفعل بصيغة كود مصر
+    if (
+      value.startsWith("20")
+    ) {
       return value;
     }
 
-    if (value.startsWith("0")) {
-      return "20" + value.substring(1);
+    // رقم مخزن 10 أرقام بدون الصفر الأول
+    // مثال:
+    // 1038420020
+    //
+    // يصبح:
+    // 201038420020
+    if (
+      value.length === 10
+    ) {
+      return "20" + value;
+    }
+
+    // رقم مصري عادي 11 رقم
+    // مثال:
+    // 01038420020
+    //
+    // يصبح:
+    // 201038420020
+    if (
+      value.length === 11 &&
+      value.startsWith("0")
+    ) {
+      return (
+        "20" +
+        value.substring(1)
+      );
     }
 
     return value;
+  };
+
+  // التحقق من أن الرقم رقم موبايل مصري صالح
+  const isValidEgyptianPhone = (
+    phone
+  ) => {
+    if (!phone) {
+      return false;
+    }
+
+    return /^20(10|11|12|15)\d{8}$/.test(
+      phone
+    );
   };
 
   const getMonthName = () => {
@@ -138,7 +250,8 @@ export default function FinancialReportPage() {
       return "";
     }
 
-    const parts = selectedMonth.split("-");
+    const parts =
+      selectedMonth.split("-");
 
     if (parts.length !== 2) {
       return selectedMonth;
@@ -150,117 +263,156 @@ export default function FinancialReportPage() {
       1
     );
 
-    return date.toLocaleDateString("ar-EG", {
-      month: "long",
-      year: "numeric",
-    });
+    return date.toLocaleDateString(
+      "ar-EG",
+      {
+        month: "long",
+        year: "numeric",
+      }
+    );
   };
 
-  const getStudentName = (studentId) => {
+  const getStudentName = (
+    studentId
+  ) => {
     const student = students.find(
-      (item) => item.id === studentId
+      (item) =>
+        item.id === studentId
     );
 
     if (student) {
-      return student.name || "بدون اسم";
+      return (
+        student.name ||
+        "بدون اسم"
+      );
     }
 
     return "طالب غير موجود";
   };
 
-  const getStudentPhone = (studentId) => {
+  const getStudentPhone = (
+    studentId
+  ) => {
     const student = students.find(
-      (item) => item.id === studentId
+      (item) =>
+        item.id === studentId
     );
 
     if (student) {
-      return student.guardianPhone || "";
+      return (
+        student.guardianPhone ||
+        ""
+      );
     }
 
     return "";
   };
 
-  const getGroupName = (groupId) => {
+  const getGroupName = (
+    groupId
+  ) => {
     const group = groups.find(
-      (item) => item.id === groupId
+      (item) =>
+        item.id === groupId
     );
 
     if (group) {
-      return group.name || "بدون مجموعة";
+      return (
+        group.name ||
+        "بدون مجموعة"
+      );
     }
 
     return "بدون مجموعة";
   };
 
-  const getFilteredSubscriptions = () => {
-    return subscriptions.filter((subscription) => {
-      if (subscription.month !== selectedMonth) {
-        return false;
-      }
+  const getFilteredSubscriptions =
+    () => {
+      return subscriptions.filter(
+        (subscription) => {
+          if (
+            subscription.month !==
+            selectedMonth
+          ) {
+            return false;
+          }
 
-      if (
-        selectedGroup !== "all" &&
-        subscription.groupId !== selectedGroup
-      ) {
-        return false;
-      }
+          if (
+            selectedGroup !==
+              "all" &&
+            subscription.groupId !==
+              selectedGroup
+          ) {
+            return false;
+          }
 
-      return true;
-    });
-  };
+          return true;
+        }
+      );
+    };
 
   const getReportRows = () => {
     const filteredSubscriptions =
       getFilteredSubscriptions();
 
-    return filteredSubscriptions.map((subscription) => {
-      const due = Number(
-        subscription.dueAmount || 0
-      );
+    return filteredSubscriptions.map(
+      (subscription) => {
+        const due = Number(
+          subscription.dueAmount ||
+            0
+        );
 
-      const paid = Number(
-        subscription.totalPaid ||
-          subscription.paidAmount ||
-          0
-      );
+        const paid = Number(
+          subscription.totalPaid ||
+            subscription.paidAmount ||
+            0
+        );
 
-      let remaining = Number(
-        subscription.remainingAmount
-      );
+        let remaining = Number(
+          subscription.remainingAmount
+        );
 
-      if (isNaN(remaining)) {
-        remaining = due - paid;
+        if (isNaN(remaining)) {
+          remaining =
+            due - paid;
+        }
+
+        if (remaining < 0) {
+          remaining = 0;
+        }
+
+        let status =
+          "غير مدفوع";
+
+        if (remaining <= 0) {
+          status =
+            "مسدد بالكامل";
+        } else if (paid > 0) {
+          status =
+            "دفع جزئي";
+        }
+
+        return {
+          ...subscription,
+          studentName:
+            getStudentName(
+              subscription.studentId
+            ),
+          guardianPhone:
+            getStudentPhone(
+              subscription.studentId
+            ),
+          groupName:
+            getGroupName(
+              subscription.groupId
+            ),
+          due: due,
+          paid: paid,
+          remaining: remaining,
+          status: status,
+        };
       }
-
-      if (remaining < 0) {
-        remaining = 0;
-      }
-
-      let status = "غير مدفوع";
-
-      if (remaining <= 0) {
-        status = "مسدد بالكامل";
-      } else if (paid > 0) {
-        status = "دفع جزئي";
-      }
-
-      return {
-        ...subscription,
-        studentName: getStudentName(
-          subscription.studentId
-        ),
-        guardianPhone: getStudentPhone(
-          subscription.studentId
-        ),
-        groupName: getGroupName(
-          subscription.groupId
-        ),
-        due: due,
-        paid: paid,
-        remaining: remaining,
-        status: status,
-      };
-    });
+    );
   };
 
   useEffect(() => {
@@ -268,7 +420,8 @@ export default function FinancialReportPage() {
       return;
     }
 
-    const rows = getReportRows();
+    const rows =
+      getReportRows();
 
     let due = 0;
     let paid = 0;
@@ -281,11 +434,18 @@ export default function FinancialReportPage() {
     rows.forEach((row) => {
       due += row.due;
       paid += row.paid;
-      remaining += row.remaining;
+      remaining +=
+        row.remaining;
 
-      if (row.status === "مسدد بالكامل") {
+      if (
+        row.status ===
+        "مسدد بالكامل"
+      ) {
         paidStudents++;
-      } else if (row.status === "دفع جزئي") {
+      } else if (
+        row.status ===
+        "دفع جزئي"
+      ) {
         partialStudents++;
       } else {
         unpaidStudents++;
@@ -295,9 +455,10 @@ export default function FinancialReportPage() {
     let collectionPercentage = 0;
 
     if (due > 0) {
-      collectionPercentage = Math.round(
-        (paid / due) * 100
-      );
+      collectionPercentage =
+        Math.round(
+          (paid / due) * 100
+        );
     }
 
     setStats({
@@ -306,10 +467,14 @@ export default function FinancialReportPage() {
       remaining: remaining,
       collectionPercentage:
         collectionPercentage,
-      totalStudents: rows.length,
-      paidStudents: paidStudents,
-      partialStudents: partialStudents,
-      unpaidStudents: unpaidStudents,
+      totalStudents:
+        rows.length,
+      paidStudents:
+        paidStudents,
+      partialStudents:
+        partialStudents,
+      unpaidStudents:
+        unpaidStudents,
     });
   }, [
     selectedMonth,
@@ -319,7 +484,10 @@ export default function FinancialReportPage() {
     groups,
   ]);
 
-  const openPaymentWhatsApp = (row) => {
+  // إرسال تذكير الدفع عبر WhatsApp
+  const openPaymentWhatsApp = (
+    row
+  ) => {
     if (!row.guardianPhone) {
       alert(
         "لا يوجد رقم هاتف لولي الأمر لهذا الطالب."
@@ -327,16 +495,42 @@ export default function FinancialReportPage() {
       return;
     }
 
-    const phone = normalizeEgyptianPhone(
-      row.guardianPhone
-    );
+    const originalPhone =
+      row.guardianPhone;
+
+    const phone =
+      normalizeEgyptianPhone(
+        originalPhone
+      );
 
     if (!phone) {
-      alert("رقم الهاتف غير صالح.");
+      alert(
+        "لا يوجد رقم هاتف صالح لولي الأمر لهذا الطالب."
+      );
       return;
     }
 
-    const monthName = getMonthName();
+    if (
+      !isValidEgyptianPhone(
+        phone
+      )
+    ) {
+      alert(
+        "رقم ولي أمر الطالب " +
+          row.studentName +
+          " غير صالح لواتساب.\n\n" +
+          "الرقم المسجل: " +
+          originalPhone +
+          "\n\n" +
+          "النظام يتوقع رقم موبايل مصري صحيح.\n" +
+          "مثال عند التخزين بدون الصفر الأول:\n" +
+          "1038420020"
+      );
+      return;
+    }
+
+    const monthName =
+      getMonthName();
 
     let message =
       "السلام عليكم ورحمة الله وبركاته\n\n";
@@ -386,24 +580,38 @@ export default function FinancialReportPage() {
       "https://wa.me/" +
       phone +
       "?text=" +
-      encodeURIComponent(message);
+      encodeURIComponent(
+        message
+      );
 
-    window.open(url, "_blank");
+    window.open(
+      url,
+      "_blank"
+    );
   };
 
-  const getStatusClass = (status) => {
-    if (status === "مسدد بالكامل") {
+  const getStatusClass = (
+    status
+  ) => {
+    if (
+      status ===
+      "مسدد بالكامل"
+    ) {
       return "bg-green-100 text-green-700";
     }
 
-    if (status === "دفع جزئي") {
+    if (
+      status ===
+      "دفع جزئي"
+    ) {
       return "bg-amber-100 text-amber-700";
     }
 
     return "bg-red-100 text-red-700";
   };
 
-  const rows = getReportRows();
+  const rows =
+    getReportRows();
 
   return (
     <main
@@ -428,7 +636,9 @@ export default function FinancialReportPage() {
 
             <button
               onClick={() =>
-                router.push("/dashboard")
+                router.push(
+                  "/dashboard"
+                )
               }
               className="rounded-xl bg-slate-100 px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-200"
             >
@@ -452,9 +662,13 @@ export default function FinancialReportPage() {
 
               <input
                 type="month"
-                value={selectedMonth}
+                value={
+                  selectedMonth
+                }
                 onChange={(e) =>
-                  setSelectedMonth(e.target.value)
+                  setSelectedMonth(
+                    e.target.value
+                  )
                 }
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-blue-500"
               />
@@ -466,9 +680,13 @@ export default function FinancialReportPage() {
               </label>
 
               <select
-                value={selectedGroup}
+                value={
+                  selectedGroup
+                }
                 onChange={(e) =>
-                  setSelectedGroup(e.target.value)
+                  setSelectedGroup(
+                    e.target.value
+                  )
                 }
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-blue-500"
               >
@@ -476,14 +694,22 @@ export default function FinancialReportPage() {
                   كل المجموعات
                 </option>
 
-                {groups.map((group) => (
-                  <option
-                    key={group.id}
-                    value={group.id}
-                  >
-                    {group.name}
-                  </option>
-                ))}
+                {groups.map(
+                  (group) => (
+                    <option
+                      key={
+                        group.id
+                      }
+                      value={
+                        group.id
+                      }
+                    >
+                      {
+                        group.name
+                      }
+                    </option>
+                  )
+                )}
               </select>
             </div>
 
@@ -501,7 +727,9 @@ export default function FinancialReportPage() {
             <p className="mt-2 text-3xl font-bold text-blue-600">
               {loading
                 ? "..."
-                : formatMoney(stats.due)}
+                : formatMoney(
+                    stats.due
+                  )}
             </p>
 
             <p className="mt-1 text-xs text-slate-400">
@@ -517,7 +745,9 @@ export default function FinancialReportPage() {
             <p className="mt-2 text-3xl font-bold text-green-600">
               {loading
                 ? "..."
-                : formatMoney(stats.paid)}
+                : formatMoney(
+                    stats.paid
+                  )}
             </p>
 
             <p className="mt-1 text-xs text-slate-400">
@@ -533,7 +763,9 @@ export default function FinancialReportPage() {
             <p className="mt-2 text-3xl font-bold text-red-600">
               {loading
                 ? "..."
-                : formatMoney(stats.remaining)}
+                : formatMoney(
+                    stats.remaining
+                  )}
             </p>
 
             <p className="mt-1 text-xs text-slate-400">
@@ -549,7 +781,8 @@ export default function FinancialReportPage() {
             <p className="mt-2 text-3xl font-bold text-purple-600">
               {loading
                 ? "..."
-                : stats.collectionPercentage + "%"}
+                : stats.collectionPercentage +
+                  "%"}
             </p>
 
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
@@ -580,7 +813,9 @@ export default function FinancialReportPage() {
               </p>
 
               <p className="mt-2 text-3xl font-bold text-green-600">
-                {stats.paidStudents}
+                {
+                  stats.paidStudents
+                }
               </p>
 
               <p className="mt-1 text-xs text-green-600">
@@ -594,7 +829,9 @@ export default function FinancialReportPage() {
               </p>
 
               <p className="mt-2 text-3xl font-bold text-amber-600">
-                {stats.partialStudents}
+                {
+                  stats.partialStudents
+                }
               </p>
 
               <p className="mt-1 text-xs text-amber-600">
@@ -608,7 +845,9 @@ export default function FinancialReportPage() {
               </p>
 
               <p className="mt-2 text-3xl font-bold text-red-600">
-                {stats.unpaidStudents}
+                {
+                  stats.unpaidStudents
+                }
               </p>
 
               <p className="mt-1 text-xs text-red-600">
@@ -632,14 +871,18 @@ export default function FinancialReportPage() {
 
                 <p className="mt-1 text-sm text-slate-500">
                   {getMonthName()} -{" "}
-                  {selectedGroup === "all"
+                  {selectedGroup ===
+                  "all"
                     ? "كل المجموعات"
-                    : getGroupName(selectedGroup)}
+                    : getGroupName(
+                        selectedGroup
+                      )}
                 </p>
               </div>
 
               <div className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
-                عدد الطلاب: {rows.length}
+                عدد الطلاب:{" "}
+                {rows.length}
               </div>
 
             </div>
@@ -649,7 +892,8 @@ export default function FinancialReportPage() {
             <div className="p-10 text-center text-slate-500">
               جاري تحميل التقرير...
             </div>
-          ) : rows.length === 0 ? (
+          ) : rows.length ===
+            0 ? (
             <div className="p-10 text-center">
 
               <div className="text-4xl">
@@ -683,6 +927,7 @@ export default function FinancialReportPage() {
 
                 <thead className="bg-slate-50">
                   <tr>
+
                     <th className="px-4 py-4 text-sm font-bold text-slate-600">
                       الطالب
                     </th>
@@ -710,77 +955,109 @@ export default function FinancialReportPage() {
                     <th className="px-4 py-4 text-sm font-bold text-slate-600">
                       إجراء
                     </th>
+
                   </tr>
                 </thead>
 
                 <tbody>
-                  {rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className="border-t border-slate-100 hover:bg-slate-50"
-                    >
 
-                      <td className="px-4 py-4">
-                        <p className="font-bold text-slate-800">
-                          {row.studentName}
-                        </p>
-                      </td>
+                  {rows.map(
+                    (row) => (
+                      <tr
+                        key={row.id}
+                        className="border-t border-slate-100 hover:bg-slate-50"
+                      >
 
-                      <td className="px-4 py-4 text-sm text-slate-600">
-                        {row.groupName}
-                      </td>
+                        <td className="px-4 py-4">
+                          <p className="font-bold text-slate-800">
+                            {
+                              row.studentName
+                            }
+                          </p>
+                        </td>
 
-                      <td className="px-4 py-4 font-medium text-blue-600">
-                        {formatMoney(row.due)} جنيه
-                      </td>
-
-                      <td className="px-4 py-4 font-medium text-green-600">
-                        {formatMoney(row.paid)} جنيه
-                      </td>
-
-                      <td className="px-4 py-4 font-bold text-red-600">
-                        {formatMoney(row.remaining)} جنيه
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <span
-                          className={
-                            "inline-flex rounded-full px-3 py-1 text-xs font-bold " +
-                            getStatusClass(row.status)
+                        <td className="px-4 py-4 text-sm text-slate-600">
+                          {
+                            row.groupName
                           }
-                        >
-                          {row.status}
-                        </span>
-                      </td>
+                        </td>
 
-                      <td className="px-4 py-4">
+                        <td className="px-4 py-4 font-medium text-blue-600">
+                          {
+                            formatMoney(
+                              row.due
+                            )
+                          }{" "}
+                          جنيه
+                        </td>
 
-                        {row.remaining > 0 ? (
-                          <button
-                            onClick={() =>
-                              openPaymentWhatsApp(
-                                row
+                        <td className="px-4 py-4 font-medium text-green-600">
+                          {
+                            formatMoney(
+                              row.paid
+                            )
+                          }{" "}
+                          جنيه
+                        </td>
+
+                        <td className="px-4 py-4 font-bold text-red-600">
+                          {
+                            formatMoney(
+                              row.remaining
+                            )
+                          }{" "}
+                          جنيه
+                        </td>
+
+                        <td className="px-4 py-4">
+
+                          <span
+                            className={
+                              "inline-flex rounded-full px-3 py-1 text-xs font-bold " +
+                              getStatusClass(
+                                row.status
                               )
                             }
-                            className="rounded-lg bg-green-50 px-3 py-2 text-xs font-bold text-green-700 transition hover:bg-green-100"
                           >
-                            📱 تذكير واتساب
-                          </button>
-                        ) : (
-                          <span className="text-xs text-slate-400">
-                            مكتمل
+                            {
+                              row.status
+                            }
                           </span>
-                        )}
 
-                      </td>
+                        </td>
 
-                    </tr>
-                  ))}
+                        <td className="px-4 py-4">
+
+                          {row.remaining >
+                          0 ? (
+                            <button
+                              onClick={() =>
+                                openPaymentWhatsApp(
+                                  row
+                                )
+                              }
+                              className="rounded-lg bg-green-50 px-3 py-2 text-xs font-bold text-green-700 transition hover:bg-green-100"
+                            >
+                              📱 تذكير واتساب
+                            </button>
+                          ) : (
+                            <span className="text-xs text-slate-400">
+                              مكتمل
+                            </span>
+                          )}
+
+                        </td>
+
+                      </tr>
+                    )
+                  )}
+
                 </tbody>
 
                 <tfoot className="bg-slate-50">
 
                   <tr>
+
                     <td
                       colSpan="2"
                       className="px-4 py-4 font-bold text-slate-800"
@@ -789,18 +1066,34 @@ export default function FinancialReportPage() {
                     </td>
 
                     <td className="px-4 py-4 font-bold text-blue-700">
-                      {formatMoney(stats.due)} جنيه
+                      {
+                        formatMoney(
+                          stats.due
+                        )
+                      }{" "}
+                      جنيه
                     </td>
 
                     <td className="px-4 py-4 font-bold text-green-700">
-                      {formatMoney(stats.paid)} جنيه
+                      {
+                        formatMoney(
+                          stats.paid
+                        )
+                      }{" "}
+                      جنيه
                     </td>
 
                     <td className="px-4 py-4 font-bold text-red-700">
-                      {formatMoney(stats.remaining)} جنيه
+                      {
+                        formatMoney(
+                          stats.remaining
+                        )
+                      }{" "}
+                      جنيه
                     </td>
 
                     <td colSpan="2"></td>
+
                   </tr>
 
                 </tfoot>
@@ -826,7 +1119,9 @@ export default function FinancialReportPage() {
               </span>
 
               <span className="font-bold text-slate-800">
-                {stats.totalStudents}
+                {
+                  stats.totalStudents
+                }
               </span>
             </div>
 
@@ -836,7 +1131,10 @@ export default function FinancialReportPage() {
               </span>
 
               <span className="font-bold text-green-700">
-                {stats.collectionPercentage}%
+                {
+                  stats.collectionPercentage
+                }
+                %
               </span>
             </div>
 
@@ -846,7 +1144,12 @@ export default function FinancialReportPage() {
               </span>
 
               <span className="font-bold text-red-700">
-                {formatMoney(stats.remaining)} جنيه
+                {
+                  formatMoney(
+                    stats.remaining
+                  )
+                }{" "}
+                جنيه
               </span>
             </div>
 

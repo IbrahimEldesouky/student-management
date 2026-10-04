@@ -286,27 +286,99 @@ export default function AttendancePage() {
     setAttendance(newAttendance);
   };
 
-  // تحويل رقم الهاتف للصيغة المناسبة لـ WhatsApp
+  // تحويل الأرقام العربية والفارسية إلى أرقام إنجليزية
+  const convertArabicAndPersianDigits = (value) => {
+    if (!value) {
+      return "";
+    }
+
+    const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+    const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+
+    return String(value)
+      .split("")
+      .map(function (char) {
+        const arabicIndex = arabicDigits.indexOf(char);
+
+        if (arabicIndex !== -1) {
+          return String(arabicIndex);
+        }
+
+        const persianIndex = persianDigits.indexOf(char);
+
+        if (persianIndex !== -1) {
+          return String(persianIndex);
+        }
+
+        return char;
+      })
+      .join("");
+  };
+
+  // تحويل رقم الهاتف للصيغة الصحيحة لـ WhatsApp
+  // الأرقام المخزنة في النظام عادةً:
+  // 1012345678
+  // 1112345678
+  // 1212345678
+  // 1512345678
+  //
+  // وتتحول إلى:
+  // 201012345678
+  // 201112345678
+  // 201212345678
+  // 201512345678
   const normalizeEgyptianPhone = (phone) => {
     if (!phone) {
       return "";
     }
 
-    let cleanPhone = String(phone).replace(/\D/g, "");
+    let cleanPhone = convertArabicAndPersianDigits(phone);
 
-    if (cleanPhone.startsWith("0020")) {
+    cleanPhone = cleanPhone.replace(/\D/g, "");
+
+    // إزالة 00 من بداية الرقم الدولي
+    if (cleanPhone.startsWith("00")) {
       cleanPhone = cleanPhone.substring(2);
     }
 
-    if (cleanPhone.startsWith("20")) {
-      return cleanPhone;
+    // لو الرقم مكتوب بصيغة دولية مصرية
+    if (
+      cleanPhone.length === 12 &&
+      cleanPhone.startsWith("20")
+    ) {
+      return /^20(10|11|12|15)\d{8}$/.test(cleanPhone)
+        ? cleanPhone
+        : "";
     }
 
-    if (cleanPhone.startsWith("0")) {
+    // لو الرقم 10 أرقام بدون الصفر
+    // مثال: 1012345678
+    if (
+      cleanPhone.length === 10 &&
+      /^(10|11|12|15)\d{8}$/.test(cleanPhone)
+    ) {
+      return "20" + cleanPhone;
+    }
+
+    // لو الرقم 11 رقم ويبدأ بصفر
+    // مثال: 01012345678
+    if (
+      cleanPhone.length === 11 &&
+      /^0(10|11|12|15)\d{8}$/.test(cleanPhone)
+    ) {
       return "20" + cleanPhone.substring(1);
     }
 
-    return cleanPhone;
+    // لو الرقم يبدأ بعلامة + وتم تنظيفها بالفعل
+    // يتم التحقق من الرقم الدولي
+    if (
+      cleanPhone.length === 12 &&
+      /^20(10|11|12|15)\d{8}$/.test(cleanPhone)
+    ) {
+      return cleanPhone;
+    }
+
+    return "";
   };
 
   // فتح WhatsApp برسالة جاهزة
@@ -317,8 +389,14 @@ export default function AttendancePage() {
 
     if (!phone) {
       alert(
-        "لا يوجد رقم هاتف مسجل لولي أمر الطالب " +
-          student.name
+        "رقم ولي أمر الطالب " +
+          student.name +
+          " غير صالح لواتساب.\n\n" +
+          "الرقم المسجل: " +
+          (student.guardianPhone || "غير موجود") +
+          "\n\n" +
+          "يجب تسجيل رقم الموبايل المصري 10 أرقام بدون الصفر، مثل:\n" +
+          "1012345678"
       );
       return;
     }
@@ -788,6 +866,7 @@ export default function AttendancePage() {
                     " - " +
                     trainingDay
                   : "اختر التاريخ"}
+
               </p>
 
             </div>

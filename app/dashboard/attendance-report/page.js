@@ -529,7 +529,38 @@ export default function AttendanceReportPage() {
       };
     };
 
+  // تحويل الأرقام العربية والفارسية إلى أرقام إنجليزية
+  const convertArabicDigits =
+    function (value) {
+      if (!value) {
+        return "";
+      }
+
+      return String(value)
+        .replace(/[٠-٩]/g, function (digit) {
+          return String(
+            "٠١٢٣٤٥٦٧٨٩".indexOf(
+              digit
+            )
+          );
+        })
+        .replace(/[۰-۹]/g, function (digit) {
+          return String(
+            "۰۱۲۳۴۵۶۷۸۹".indexOf(
+              digit
+            )
+          );
+        });
+    };
+
   // تحويل رقم الهاتف المصري إلى صيغة WhatsApp
+  //
+  // النظام عندنا يخزن أرقام أولياء الأمور
+  // بدون الصفر الأول، أي 10 أرقام:
+  // 1038420020
+  //
+  // ويتم تحويله إلى:
+  // 201038420020
   const normalizeEgyptianPhone =
     function (phone) {
       if (!phone) {
@@ -537,11 +568,18 @@ export default function AttendanceReportPage() {
       }
 
       let cleanPhone =
-        String(phone).replace(
+        convertArabicDigits(
+          phone
+        ).replace(
           /\D/g,
           ""
         );
 
+      if (!cleanPhone) {
+        return "";
+      }
+
+      // 0020xxxxxxxxxx
       if (
         cleanPhone.startsWith(
           "0020"
@@ -551,6 +589,7 @@ export default function AttendanceReportPage() {
           cleanPhone.substring(2);
       }
 
+      // 20xxxxxxxxxx
       if (
         cleanPhone.startsWith(
           "20"
@@ -559,10 +598,25 @@ export default function AttendanceReportPage() {
         return cleanPhone;
       }
 
+      // رقم مخزن 10 أرقام بدون الصفر الأول
+      // مثال:
+      // 1038420020
+      // يصبح:
+      // 201038420020
       if (
-        cleanPhone.startsWith(
-          "0"
-        )
+        cleanPhone.length === 10
+      ) {
+        return "20" + cleanPhone;
+      }
+
+      // رقم مصري عادي 11 رقم يبدأ بـ 01
+      // مثال:
+      // 01038420020
+      // يصبح:
+      // 201038420020
+      if (
+        cleanPhone.length === 11 &&
+        cleanPhone.startsWith("0")
       ) {
         return (
           "20" +
@@ -573,18 +627,52 @@ export default function AttendanceReportPage() {
       return cleanPhone;
     };
 
+  // التحقق من أن الرقم أصبح رقم موبايل مصري صالح لواتساب
+  const isValidEgyptianPhone =
+    function (phone) {
+      if (!phone) {
+        return false;
+      }
+
+      return /^20(10|11|12|15)\d{8}$/.test(
+        phone
+      );
+    };
+
   // إرسال تقرير الحضور عبر WhatsApp
   const openWhatsApp =
     function (student) {
+      const originalPhone =
+        student.guardianPhone || "";
+
       const phone =
         normalizeEgyptianPhone(
-          student.guardianPhone
+          originalPhone
         );
 
       if (!phone) {
         alert(
           "لا يوجد رقم هاتف مسجل لولي أمر الطالب " +
             student.name
+        );
+        return;
+      }
+
+      if (
+        !isValidEgyptianPhone(
+          phone
+        )
+      ) {
+        alert(
+          "رقم ولي أمر الطالب " +
+            student.name +
+            " غير صالح لواتساب.\n\n" +
+            "الرقم المسجل: " +
+            originalPhone +
+            "\n\n" +
+            "النظام يتوقع رقم موبايل مصري صحيح.\n" +
+            "مثال عند التخزين بدون الصفر الأول:\n" +
+            "1038420020"
         );
         return;
       }
