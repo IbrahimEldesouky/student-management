@@ -69,9 +69,7 @@ export default function DashboardPage() {
       const today = getToday();
       const currentMonth = getCurrentMonth();
 
-      // =========================
       // الطلاب
-      // =========================
       const studentsSnapshot = await getDocs(
         collection(db, "students")
       );
@@ -89,9 +87,7 @@ export default function DashboardPage() {
         (student) => student.status === "active"
       );
 
-      // =========================
       // المجموعات
-      // =========================
       const groupsSnapshot = await getDocs(
         collection(db, "groups")
       );
@@ -105,9 +101,7 @@ export default function DashboardPage() {
         });
       });
 
-      // =========================
       // حضور اليوم
-      // =========================
       const attendanceSnapshot = await getDocs(
         collection(db, "attendance")
       );
@@ -165,9 +159,7 @@ export default function DashboardPage() {
         );
       }
 
-      // =========================
       // الاشتراكات
-      // =========================
       const subscriptionsSnapshot = await getDocs(
         collection(db, "subscriptions")
       );
@@ -269,17 +261,12 @@ export default function DashboardPage() {
     >
       <div className="flex min-h-screen">
 
-        {/* ================================================== */}
-        {/* SIDEBAR */}
-        {/* ================================================== */}
+        {/* القائمة الجانبية */}
 
         <aside className="hidden w-72 shrink-0 border-l border-slate-200 bg-white lg:flex lg:flex-col">
 
-          {/* Logo / Title */}
           <div className="border-b border-slate-100 p-6">
-
             <div className="flex items-center gap-3">
-
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-2xl text-white">
                 🎓
               </div>
@@ -293,12 +280,9 @@ export default function DashboardPage() {
                   لوحة الإدارة
                 </p>
               </div>
-
             </div>
-
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 p-4">
 
             <p className="mb-3 px-3 text-xs font-bold text-slate-400">
@@ -306,9 +290,7 @@ export default function DashboardPage() {
             </p>
 
             <button
-              onClick={() =>
-                router.push("/dashboard")
-              }
+              onClick={() => router.push("/dashboard")}
               className="mb-1 flex w-full items-center gap-3 rounded-xl bg-slate-800 px-4 py-3 text-right font-medium text-white"
             >
               <span className="text-lg">🏠</span>
@@ -322,9 +304,7 @@ export default function DashboardPage() {
             </p>
 
             <button
-              onClick={() =>
-                router.push("/dashboard/students")
-              }
+              onClick={() => router.push("/dashboard/students")}
               className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
             >
               <span className="text-lg">👨‍🎓</span>
@@ -332,9 +312,7 @@ export default function DashboardPage() {
             </button>
 
             <button
-              onClick={() =>
-                router.push("/dashboard/groups")
-              }
+              onClick={() => router.push("/dashboard/groups")}
               className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-purple-50 hover:text-purple-700"
             >
               <span className="text-lg">👥</span>
@@ -348,9 +326,7 @@ export default function DashboardPage() {
             </p>
 
             <button
-              onClick={() =>
-                router.push("/dashboard/attendance")
-              }
+              onClick={() => router.push("/dashboard/attendance")}
               className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-green-50 hover:text-green-700"
             >
               <span className="text-lg">✅</span>
@@ -359,14 +335,23 @@ export default function DashboardPage() {
 
             <button
               onClick={() =>
-                router.push(
-                  "/dashboard/attendance-report"
-                )
+                router.push("/dashboard/attendance-report")
               }
               className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-orange-50 hover:text-orange-700"
             >
               <span className="text-lg">📊</span>
               <span>تقرير الحضور</span>
+            </button>
+
+            {/* كشف الحضور الفاضي */}
+            <button
+              onClick={() =>
+                router.push("/dashboard/blank-attendance")
+              }
+              className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-teal-50 hover:text-teal-700"
+            >
+              <span className="text-lg">📝</span>
+              <span>كشف الحضور الفاضي</span>
             </button>
 
             <div className="my-5 border-t border-slate-100"></div>
@@ -377,9 +362,7 @@ export default function DashboardPage() {
 
             <button
               onClick={() =>
-                router.push(
-                  "/dashboard/subscriptions"
-                )
+                router.push("/dashboard/subscriptions")
               }
               className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-amber-50 hover:text-amber-700"
             >
@@ -389,9 +372,7 @@ export default function DashboardPage() {
 
             <button
               onClick={() =>
-                router.push(
-                  "/dashboard/financial-report"
-                )
+                router.push("/dashboard/financial-report")
               }
               className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700"
             >
@@ -399,11 +380,20 @@ export default function DashboardPage() {
               <span>التقرير المالي</span>
             </button>
 
+            {/* التحصيل اليومي */}
+            <button
+              onClick={() =>
+                router.push("/dashboard/daily-payments")
+              }
+              className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+            >
+              <span className="text-lg">🧾</span>
+              <span>التحصيل اليومي</span>
+            </button>
+
           </nav>
 
-          {/* Logout */}
           <div className="border-t border-slate-100 p-4">
-
             <button
               onClick={handleLogout}
               className="flex w-full items-center gap-3 rounded-xl bg-red-50 px-4 py-3 font-medium text-red-600 transition hover:bg-red-100"
@@ -411,24 +401,20 @@ export default function DashboardPage() {
               <span className="text-lg">🚪</span>
               <span>تسجيل الخروج</span>
             </button>
-
           </div>
 
         </aside>
 
-        {/* ================================================== */}
-        {/* MAIN CONTENT */}
-        {/* ================================================== */}
+        {/* المحتوى الرئيسي */}
 
         <div className="min-w-0 flex-1">
 
-          {/* Mobile Header */}
+          {/* رأس الصفحة للموبايل */}
           <div className="border-b border-slate-200 bg-white p-4 lg:hidden">
 
             <div className="flex items-center justify-between">
 
               <div className="flex items-center gap-3">
-
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-xl text-white">
                   🎓
                 </div>
@@ -442,7 +428,6 @@ export default function DashboardPage() {
                     لوحة التحكم
                   </p>
                 </div>
-
               </div>
 
               <button
@@ -454,96 +439,91 @@ export default function DashboardPage() {
 
             </div>
 
-            {/* Mobile Navigation */}
+            {/* قائمة الموبايل */}
             <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
 
               <button
-                onClick={() =>
-                  router.push("/dashboard/students")
-                }
+                onClick={() => router.push("/dashboard/students")}
                 className="rounded-xl bg-blue-50 p-3 text-center text-xs font-medium text-blue-700"
               >
                 👨‍🎓
-                <div className="mt-1">
-                  الطلاب
-                </div>
+                <div className="mt-1">الطلاب</div>
               </button>
 
               <button
-                onClick={() =>
-                  router.push("/dashboard/groups")
-                }
+                onClick={() => router.push("/dashboard/groups")}
                 className="rounded-xl bg-purple-50 p-3 text-center text-xs font-medium text-purple-700"
               >
                 👥
-                <div className="mt-1">
-                  المجموعات
-                </div>
+                <div className="mt-1">المجموعات</div>
               </button>
 
               <button
-                onClick={() =>
-                  router.push("/dashboard/attendance")
-                }
+                onClick={() => router.push("/dashboard/attendance")}
                 className="rounded-xl bg-green-50 p-3 text-center text-xs font-medium text-green-700"
               >
                 ✅
-                <div className="mt-1">
-                  الحضور
-                </div>
+                <div className="mt-1">الحضور</div>
               </button>
 
               <button
                 onClick={() =>
-                  router.push(
-                    "/dashboard/attendance-report"
-                  )
+                  router.push("/dashboard/attendance-report")
                 }
                 className="rounded-xl bg-orange-50 p-3 text-center text-xs font-medium text-orange-700"
               >
                 📊
-                <div className="mt-1">
-                  تقرير الحضور
-                </div>
+                <div className="mt-1">تقرير الحضور</div>
               </button>
 
               <button
                 onClick={() =>
-                  router.push(
-                    "/dashboard/subscriptions"
-                  )
+                  router.push("/dashboard/subscriptions")
                 }
                 className="rounded-xl bg-amber-50 p-3 text-center text-xs font-medium text-amber-700"
               >
                 💰
-                <div className="mt-1">
-                  الاشتراكات
-                </div>
+                <div className="mt-1">الاشتراكات</div>
               </button>
 
               <button
                 onClick={() =>
-                  router.push(
-                    "/dashboard/financial-report"
-                  )
+                  router.push("/dashboard/financial-report")
                 }
                 className="rounded-xl bg-indigo-50 p-3 text-center text-xs font-medium text-indigo-700"
               >
                 📈
-                <div className="mt-1">
-                  التقرير المالي
-                </div>
+                <div className="mt-1">التقرير المالي</div>
+              </button>
+
+              <button
+                onClick={() =>
+                  router.push("/dashboard/blank-attendance")
+                }
+                className="rounded-xl bg-teal-50 p-3 text-center text-xs font-medium text-teal-700"
+              >
+                📝
+                <div className="mt-1">كشف الحضور الفاضي</div>
+              </button>
+
+              <button
+                onClick={() =>
+                  router.push("/dashboard/daily-payments")
+                }
+                className="rounded-xl bg-emerald-50 p-3 text-center text-xs font-medium text-emerald-700"
+              >
+                🧾
+                <div className="mt-1">التحصيل اليومي</div>
               </button>
 
             </div>
 
           </div>
-
-          <div className="p-4 sm:p-6">
+                <div className="p-4 sm:p-6">
 
             <div className="mx-auto max-w-7xl">
 
-              {/* ================= HEADER ================= */}
+              {/* رأس لوحة التحكم */}
 
               <div className="mb-6 hidden rounded-2xl bg-white p-5 shadow-sm lg:flex lg:items-center lg:justify-between">
 
@@ -563,7 +543,7 @@ export default function DashboardPage() {
 
               </div>
 
-              {/* ================= MAIN STATS ================= */}
+              {/* الإحصائيات الرئيسية */}
 
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -574,17 +554,13 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
 
                     <div>
-
                       <p className="text-sm text-slate-500">
                         الطلاب النشطين
                       </p>
 
                       <p className="mt-2 text-3xl font-bold text-slate-800">
-                        {loading
-                          ? "..."
-                          : stats.students}
+                        {loading ? "..." : stats.students}
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-blue-50 p-3 text-2xl">
@@ -594,11 +570,7 @@ export default function DashboardPage() {
                   </div>
 
                   <button
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/students"
-                      )
-                    }
+                    onClick={() => router.push("/dashboard/students")}
                     className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-700"
                   >
                     عرض الطلاب ←
@@ -613,17 +585,13 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
 
                     <div>
-
                       <p className="text-sm text-slate-500">
                         المجموعات
                       </p>
 
                       <p className="mt-2 text-3xl font-bold text-slate-800">
-                        {loading
-                          ? "..."
-                          : stats.groups}
+                        {loading ? "..." : stats.groups}
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-purple-50 p-3 text-2xl">
@@ -633,11 +601,7 @@ export default function DashboardPage() {
                   </div>
 
                   <button
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/groups"
-                      )
-                    }
+                    onClick={() => router.push("/dashboard/groups")}
                     className="mt-4 text-sm font-medium text-purple-600 hover:text-purple-700"
                   >
                     إدارة المجموعات ←
@@ -652,21 +616,17 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
 
                     <div>
-
                       <p className="text-sm text-slate-500">
                         حضور اليوم
                       </p>
 
                       <p className="mt-2 text-3xl font-bold text-green-600">
-                        {loading
-                          ? "..."
-                          : stats.todayPresent}
+                        {loading ? "..." : stats.todayPresent}
                       </p>
 
                       <p className="mt-1 text-xs text-slate-400">
                         من أصل {stats.todayTotal} تسجيل
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-green-50 p-3 text-2xl">
@@ -676,11 +636,7 @@ export default function DashboardPage() {
                   </div>
 
                   <button
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/attendance"
-                      )
-                    }
+                    onClick={() => router.push("/dashboard/attendance")}
                     className="mt-4 text-sm font-medium text-green-600 hover:text-green-700"
                   >
                     تسجيل الحضور ←
@@ -695,7 +651,6 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between">
 
                     <div>
-
                       <p className="text-sm text-slate-500">
                         المتأخرات
                       </p>
@@ -703,15 +658,12 @@ export default function DashboardPage() {
                       <p className="mt-2 text-3xl font-bold text-red-600">
                         {loading
                           ? "..."
-                          : formatMoney(
-                              stats.remaining
-                            ) + " جنيه"}
+                          : formatMoney(stats.remaining) + " جنيه"}
                       </p>
 
                       <p className="mt-1 text-xs text-slate-400">
                         {getCurrentMonthName()}
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-red-50 p-3 text-2xl">
@@ -722,9 +674,7 @@ export default function DashboardPage() {
 
                   <button
                     onClick={() =>
-                      router.push(
-                        "/dashboard/financial-report"
-                      )
+                      router.push("/dashboard/financial-report")
                     }
                     className="mt-4 text-sm font-medium text-red-600 hover:text-red-700"
                   >
@@ -735,18 +685,17 @@ export default function DashboardPage() {
 
               </div>
 
-              {/* ================= ATTENDANCE + FINANCIAL ================= */}
+              {/* الحضور والماليات */}
 
               <div className="mt-6 grid gap-6 xl:grid-cols-2">
 
-                {/* الحضور */}
+                {/* ملخص الحضور */}
 
                 <div className="rounded-2xl bg-white p-6 shadow-sm">
 
                   <div className="flex items-center justify-between">
 
                     <div>
-
                       <h2 className="text-lg font-bold text-slate-800">
                         حضور اليوم
                       </h2>
@@ -754,7 +703,6 @@ export default function DashboardPage() {
                       <p className="mt-1 text-sm text-slate-500">
                         ملخص تسجيل الحضور والغياب
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-blue-50 p-3 text-xl">
@@ -766,45 +714,33 @@ export default function DashboardPage() {
                   <div className="mt-6 grid grid-cols-3 gap-3">
 
                     <div className="rounded-xl bg-green-50 p-4 text-center">
-
                       <p className="text-sm text-green-700">
                         حاضر
                       </p>
 
                       <p className="mt-2 text-2xl font-bold text-green-600">
-                        {loading
-                          ? "..."
-                          : stats.todayPresent}
+                        {loading ? "..." : stats.todayPresent}
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-red-50 p-4 text-center">
-
                       <p className="text-sm text-red-700">
                         غائب
                       </p>
 
                       <p className="mt-2 text-2xl font-bold text-red-600">
-                        {loading
-                          ? "..."
-                          : stats.todayAbsent}
+                        {loading ? "..." : stats.todayAbsent}
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-slate-50 p-4 text-center">
-
                       <p className="text-sm text-slate-600">
                         الإجمالي
                       </p>
 
                       <p className="mt-2 text-2xl font-bold text-slate-700">
-                        {loading
-                          ? "..."
-                          : stats.todayTotal}
+                        {loading ? "..." : stats.todayTotal}
                       </p>
-
                     </div>
 
                   </div>
@@ -812,7 +748,6 @@ export default function DashboardPage() {
                   <div className="mt-5">
 
                     <div className="mb-2 flex items-center justify-between">
-
                       <span className="text-sm text-slate-500">
                         نسبة الحضور
                       </span>
@@ -820,32 +755,24 @@ export default function DashboardPage() {
                       <span className="font-bold text-slate-700">
                         {loading
                           ? "..."
-                          : stats.attendancePercentage +
-                            "%"}
+                          : stats.attendancePercentage + "%"}
                       </span>
-
                     </div>
 
                     <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-
                       <div
                         className="h-full rounded-full bg-green-500 transition-all"
                         style={{
-                          width:
-                            stats.attendancePercentage +
-                            "%",
+                          width: stats.attendancePercentage + "%",
                         }}
                       ></div>
-
                     </div>
 
                   </div>
 
                   <button
                     onClick={() =>
-                      router.push(
-                        "/dashboard/attendance-report"
-                      )
+                      router.push("/dashboard/attendance-report")
                     }
                     className="mt-5 w-full rounded-xl bg-slate-800 px-4 py-3 font-medium text-white transition hover:bg-slate-700"
                   >
@@ -854,14 +781,13 @@ export default function DashboardPage() {
 
                 </div>
 
-                {/* الاشتراكات */}
+                {/* ملخص الاشتراكات */}
 
                 <div className="rounded-2xl bg-white p-6 shadow-sm">
 
                   <div className="flex items-center justify-between">
 
                     <div>
-
                       <h2 className="text-lg font-bold text-slate-800">
                         اشتراكات الشهر
                       </h2>
@@ -869,7 +795,6 @@ export default function DashboardPage() {
                       <p className="mt-1 text-sm text-slate-500">
                         {getCurrentMonthName()}
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-amber-50 p-3 text-xl">
@@ -881,63 +806,45 @@ export default function DashboardPage() {
                   <div className="mt-6 grid grid-cols-3 gap-3">
 
                     <div className="rounded-xl bg-blue-50 p-4 text-center">
-
                       <p className="text-xs text-blue-700">
                         المستحق
                       </p>
 
                       <p className="mt-2 text-xl font-bold text-blue-700">
-                        {loading
-                          ? "..."
-                          : formatMoney(
-                              stats.due
-                            )}
+                        {loading ? "..." : formatMoney(stats.due)}
                       </p>
 
                       <p className="text-xs text-slate-400">
                         جنيه
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-green-50 p-4 text-center">
-
                       <p className="text-xs text-green-700">
                         المدفوع
                       </p>
 
                       <p className="mt-2 text-xl font-bold text-green-700">
-                        {loading
-                          ? "..."
-                          : formatMoney(
-                              stats.paid
-                            )}
+                        {loading ? "..." : formatMoney(stats.paid)}
                       </p>
 
                       <p className="text-xs text-slate-400">
                         جنيه
                       </p>
-
                     </div>
 
                     <div className="rounded-xl bg-red-50 p-4 text-center">
-
                       <p className="text-xs text-red-700">
                         المتبقي
                       </p>
 
                       <p className="mt-2 text-xl font-bold text-red-700">
-                        {loading
-                          ? "..."
-                          : formatMoney(
-                              stats.remaining
-                            )}
+                        {loading ? "..." : formatMoney(stats.remaining)}
                       </p>
 
                       <p className="text-xs text-slate-400">
                         جنيه
                       </p>
-
                     </div>
 
                   </div>
@@ -945,7 +852,6 @@ export default function DashboardPage() {
                   <div className="mt-5 grid grid-cols-3 gap-2 text-center text-sm">
 
                     <div>
-
                       <span className="font-bold text-green-600">
                         {stats.subscriptionsPaid}
                       </span>
@@ -953,11 +859,9 @@ export default function DashboardPage() {
                       <p className="text-xs text-slate-500">
                         مكتمل
                       </p>
-
                     </div>
 
                     <div>
-
                       <span className="font-bold text-amber-600">
                         {stats.subscriptionsPartial}
                       </span>
@@ -965,11 +869,9 @@ export default function DashboardPage() {
                       <p className="text-xs text-slate-500">
                         جزئي
                       </p>
-
                     </div>
 
                     <div>
-
                       <span className="font-bold text-red-600">
                         {stats.subscriptionsUnpaid}
                       </span>
@@ -977,16 +879,13 @@ export default function DashboardPage() {
                       <p className="text-xs text-slate-500">
                         غير مدفوع
                       </p>
-
                     </div>
 
                   </div>
 
                   <button
                     onClick={() =>
-                      router.push(
-                        "/dashboard/financial-report"
-                      )
+                      router.push("/dashboard/financial-report")
                     }
                     className="mt-5 w-full rounded-xl bg-slate-800 px-4 py-3 font-medium text-white transition hover:bg-slate-700"
                   >
@@ -997,7 +896,7 @@ export default function DashboardPage() {
 
               </div>
 
-              {/* ================= QUICK ACTIONS ================= */}
+              {/* الوصول السريع */}
 
               <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
 
@@ -1011,17 +910,13 @@ export default function DashboardPage() {
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 
+                  {/* الطلاب */}
+
                   <button
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/students"
-                      )
-                    }
+                    onClick={() => router.push("/dashboard/students")}
                     className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-blue-300 hover:bg-blue-50"
                   >
-                    <div className="text-2xl">
-                      👨‍🎓
-                    </div>
+                    <div className="text-2xl">👨‍🎓</div>
 
                     <p className="mt-2 font-bold text-slate-800">
                       الطلاب
@@ -1032,17 +927,13 @@ export default function DashboardPage() {
                     </p>
                   </button>
 
+                  {/* المجموعات */}
+
                   <button
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/groups"
-                      )
-                    }
+                    onClick={() => router.push("/dashboard/groups")}
                     className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-purple-300 hover:bg-purple-50"
                   >
-                    <div className="text-2xl">
-                      👥
-                    </div>
+                    <div className="text-2xl">👥</div>
 
                     <p className="mt-2 font-bold text-slate-800">
                       المجموعات
@@ -1053,17 +944,13 @@ export default function DashboardPage() {
                     </p>
                   </button>
 
+                  {/* تسجيل الحضور */}
+
                   <button
-                    onClick={() =>
-                      router.push(
-                        "/dashboard/attendance"
-                      )
-                    }
+                    onClick={() => router.push("/dashboard/attendance")}
                     className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-green-300 hover:bg-green-50"
                   >
-                    <div className="text-2xl">
-                      ✅
-                    </div>
+                    <div className="text-2xl">✅</div>
 
                     <p className="mt-2 font-bold text-slate-800">
                       تسجيل الحضور
@@ -1074,17 +961,15 @@ export default function DashboardPage() {
                     </p>
                   </button>
 
+                  {/* تقرير الحضور */}
+
                   <button
                     onClick={() =>
-                      router.push(
-                        "/dashboard/attendance-report"
-                      )
+                      router.push("/dashboard/attendance-report")
                     }
                     className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-orange-300 hover:bg-orange-50"
                   >
-                    <div className="text-2xl">
-                      📊
-                    </div>
+                    <div className="text-2xl">📊</div>
 
                     <p className="mt-2 font-bold text-slate-800">
                       تقرير الحضور
@@ -1095,17 +980,15 @@ export default function DashboardPage() {
                     </p>
                   </button>
 
+                  {/* الاشتراكات */}
+
                   <button
                     onClick={() =>
-                      router.push(
-                        "/dashboard/subscriptions"
-                      )
+                      router.push("/dashboard/subscriptions")
                     }
                     className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-amber-300 hover:bg-amber-50"
                   >
-                    <div className="text-2xl">
-                      💰
-                    </div>
+                    <div className="text-2xl">💰</div>
 
                     <p className="mt-2 font-bold text-slate-800">
                       الاشتراكات
@@ -1116,17 +999,53 @@ export default function DashboardPage() {
                     </p>
                   </button>
 
+                  {/* التحصيل اليومي */}
+
                   <button
                     onClick={() =>
-                      router.push(
-                        "/dashboard/financial-report"
-                      )
+                      router.push("/dashboard/daily-payments")
+                    }
+                    className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-emerald-300 hover:bg-emerald-50"
+                  >
+                    <div className="text-2xl">🧾</div>
+
+                    <p className="mt-2 font-bold text-slate-800">
+                      التحصيل اليومي
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      مراجعة مدفوعات يوم محدد
+                    </p>
+                  </button>
+
+                  {/* كشف الحضور الفاضي */}
+
+                  <button
+                    onClick={() =>
+                      router.push("/dashboard/blank-attendance")
+                    }
+                    className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-teal-300 hover:bg-teal-50"
+                  >
+                    <div className="text-2xl">📝</div>
+
+                    <p className="mt-2 font-bold text-slate-800">
+                      كشف الحضور الفاضي
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      كشف للطباعة والتسجيل اليدوي
+                    </p>
+                  </button>
+
+                  {/* التقرير المالي */}
+
+                  <button
+                    onClick={() =>
+                      router.push("/dashboard/financial-report")
                     }
                     className="rounded-xl border border-slate-200 p-4 text-right transition hover:border-indigo-300 hover:bg-indigo-50"
                   >
-                    <div className="text-2xl">
-                      📈
-                    </div>
+                    <div className="text-2xl">📈</div>
 
                     <p className="mt-2 font-bold text-slate-800">
                       التقرير المالي
@@ -1141,7 +1060,7 @@ export default function DashboardPage() {
 
               </div>
 
-              {/* ================= WELCOME ================= */}
+              {/* رسالة الترحيب */}
 
               <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
 
@@ -1152,7 +1071,6 @@ export default function DashboardPage() {
                   </div>
 
                   <div>
-
                     <h2 className="text-lg font-bold text-slate-800">
                       مرحبًا بك في نظام إدارة الطلاب
                     </h2>
@@ -1162,7 +1080,6 @@ export default function DashboardPage() {
                       والحضور والاشتراكات والتقارير المالية
                       وتقارير الحضور من مكان واحد.
                     </p>
-
                   </div>
 
                 </div>
